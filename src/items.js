@@ -63,7 +63,7 @@ export const items = [
   { id: 62, text: "Finisher" },
   { id: 63, text: "Schlagkraft" },
   { id: 64, text: "Jason Herzog (Präsenz)" },
-  { id: 65, text: "Know How" },
+  { id: 65, text: "Jesus/Lord/Allah" },
   { id: 66, text: "souverän" },
   { id: 67, text: "Top Control" },
   { id: 68, text: "ausgepowert" },
