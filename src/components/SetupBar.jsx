@@ -37,6 +37,19 @@ export default function SetupBar({ dnd, hidden }) {
             </Button>
           </>
         )}
+        {/* New game: ends the running game and clears the board */}
+        {dnd.started && (
+          <Button
+            size="xs"
+            variant="outline"
+            title="End this game and clear the board"
+            onClick={() => {
+              if (window.confirm("Spiel beenden und Board leeren?")) dnd.reset();
+            }}
+          >
+            New game
+          </Button>
+        )}
       </div>
 
       <div className="w-30 flex justify-center">

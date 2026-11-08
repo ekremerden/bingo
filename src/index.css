@@ -127,5 +127,7 @@
     }
   html {
     @apply font-sans;
+    /* disables pull-to-refresh on mobile browsers that support it */
+    overscroll-behavior-y: none;
     }
 }

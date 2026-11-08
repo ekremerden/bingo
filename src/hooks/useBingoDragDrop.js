@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { loadGame, saveGame } from "./gameStorage";
 
 // The 12 possible bingo lines on a 5×5 board as 0-based grid indices:
 // 5 rows, 5 columns and the 2 diagonals (legacy arrBingos, which was 1-based).
@@ -16,14 +17,16 @@ export const BINGO_LINES = [
  * cells[i] = item id placed in grid box i, or null if empty.
  */
 export function useBingoDragDrop(gridSize = 25) {
-  const [cells, setCells] = useState(() => Array(gridSize).fill(null));
+  // saved game from a previous page load (read once on mount), or null
+  const [saved] = useState(() => loadGame(gridSize));
+  const [cells, setCells] = useState(() => saved?.cells ?? Array(gridSize).fill(null));
   // { itemId: number, from: number | null }  (from = grid index, null = from list)
   const [dragging, setDragging] = useState(null);
   const [overIndex, setOverIndex] = useState(null);
   // item ids marked with an X (stored by item, so the mark moves with it)
-  const [marked, setMarked] = useState(() => new Set());
+  const [marked, setMarked] = useState(() => saved?.marked ?? new Set());
   // false = setup phase (fill the board), true = game running (marking only)
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState(() => saved?.started ?? false);
 
   // derived: replaces the .dropped / .undropped classes
   const placed = new Set(cells.filter((c) => c !== null));
@@ -92,7 +95,12 @@ export function useBingoDragDrop(gridSize = 25) {
   const isItemMarked = (itemId) => marked.has(itemId);
 
   // item ids of list entries that are not on the board but were flagged red
-  const [flagged, setFlagged] = useState(() => new Set());
+  const [flagged, setFlagged] = useState(() => saved?.flagged ?? new Set());
+
+  // write the game to localStorage on every change so a reload restores it
+  useEffect(() => {
+    saveGame({ cells, marked, flagged, started });
+  }, [cells, marked, flagged, started]);
   const isItemFlagged = (itemId) => !placed.has(itemId) && flagged.has(itemId);
 
   // double click on a list item: placed → same as clicking its grid box,
@@ -163,8 +171,10 @@ export function useBingoDragDrop(gridSize = 25) {
     });
   };
 
-  // Empty every grid box; all items return to the list.
+  // Empty every grid box; all items return to the list. Also ends a running
+  // game, which is the only way to leave it now that the game survives reloads.
   const reset = () => {
+    setStarted(false);
     setCells(Array(gridSize).fill(null));
     setMarked(new Set());
     setFlagged(new Set());
