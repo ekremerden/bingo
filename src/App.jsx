@@ -19,13 +19,13 @@ function App() {
         <Header onlyPlaced={onlyPlaced} />
 
       {/* sticky: the board stays visible while scrolling through the phrase list */}
-      <div className={`${sticky ? "sticky top-0 z-10" : ""} mx-auto max-w-96 bg-background py-2`}>
+      <div className={`${sticky ? "sticky top-0 z-10" : ""} mx-auto max-w-90 bg-background py-2`}>
         <div className="flex justify-center">
           <BingoGrid dnd={dnd} />
         </div>
       </div>
 
-      <div className="mx-auto max-w-96 mb-2">
+      <div className="mx-auto max-w-90 mb-2">
         <div className="mx-auto max-w-80">
           <SetupBar dnd={dnd} hidden={onlyPlaced} />
           <ResultBar
@@ -38,7 +38,7 @@ function App() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-180 my-2">
+      <main className="mx-auto max-w-90 my-2">
         <ItemList items={items} dnd={dnd} onlyPlaced={onlyPlaced} />
       </main>
     </div>

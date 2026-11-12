@@ -1,8 +1,5 @@
-import { useRef } from "react";
 import { markedBgClass, markedClasses } from "@/components/markedClasses.js";
-
-// max gap between two taps/clicks on the same item to count as a double tap
-const DOUBLE_TAP_MS = 350;
+import { useDoubleTap } from "@/hooks/useDoubleTap.js";
 
 export default function ItemList({ items, dnd, onlyPlaced = false }) {
   const {
@@ -14,26 +11,14 @@ export default function ItemList({ items, dnd, onlyPlaced = false }) {
     isItemFlagged,
     activateItem,
   } = dnd;
-  // onDoubleClick is unreliable on mobile (iOS Safari, Chrome Android), so we
-  // detect the double tap ourselves from two clicks; works for mouse too.
-  const lastTap = useRef({ itemId: null, time: 0 });
-  const handleTap = (itemId, e) => {
-    const now = e.timeStamp; // ms, monotonic
-    const prev = lastTap.current;
-    if (prev.itemId === itemId && now - prev.time < DOUBLE_TAP_MS) {
-      lastTap.current = { itemId: null, time: 0 }; // a third tap starts over
-      activateItem(itemId);
-    } else {
-      lastTap.current = { itemId, time: now };
-    }
-  };
+  const handleTap = useDoubleTap();
 
   const visibleItems = onlyPlaced
     ? items.filter((item) => placed.has(item.id))
     : items;
 
   return (
-    <ol className="columns-2 gap-6 sm:columns-2 lg:columns-3">
+    <ol className="columns-2 gap-4 sm:columns-2 lg:columns-2">
       {visibleItems.map((item) => {
         const isPlaced = placed.has(item.id);
         const isBeingDragged =
@@ -47,9 +32,10 @@ export default function ItemList({ items, dnd, onlyPlaced = false }) {
             onDragEnd={endDrag}
             // keep the double click from selecting a word
             onMouseDown={(e) => e.detail > 1 && e.preventDefault()}
-            onClick={(e) => handleTap(item.id, e)}
+            onClick={(e) => handleTap(item.id, e, () => activateItem(item.id))}
             // touch-manipulation: no double-tap-to-zoom, so the 2nd tap reaches us
-            className={`flex touch-manipulation items-center break-inside-avoid gap-2 border-t border-black/20 ${
+            className={`flex touch-manipulation items-center break-inside-avoid min-h-7
+              gap-1 border-t border-black/20 ${
               isPlaced ? "font-bold" : "cursor-grab"
             } ${isBeingDragged ? "opacity-100 text-[#227679]" : ""} ${onlyPlaced ? "min-h-7" : ""} ${
               isItemFlagged(item.id)

@@ -1,5 +1,6 @@
 import { items } from "@/items.js";
 import { markedBgClass, markedClasses } from "@/components/markedClasses.js";
+import { useDoubleTap } from "@/hooks/useDoubleTap.js";
 
 const textById = new Map(items.map((item) => [item.id, item.text]));
 
@@ -18,6 +19,8 @@ export default function BingoGrid({ dnd }) {
     leaveCell,
     dropOnCell,
   } = dnd;
+  // double tap marks a cell, so a stray tap doesn't (un)mark it by mistake
+  const handleTap = useDoubleTap();
 
   return (
     <div className="grid grid-cols-5 w-80 select-none border border-gray-400">
@@ -27,8 +30,9 @@ export default function BingoGrid({ dnd }) {
           onDragOver={dragOverCell(index)}
           onDragLeave={leaveCell}
           onDrop={dropOnCell(index)}
-          onClick={() => toggleMark(index)}
-          className={`relative aspect-square border border-gray-400 ${
+          onClick={(e) => handleTap(index, e, () => toggleMark(index))}
+          // touch-manipulation: no double-tap-to-zoom, so the 2nd tap reaches us
+          className={`relative touch-manipulation aspect-square border border-gray-400 ${
             overIndex === index ? "bg-blue-100 ring-2 ring-blue-400 ring-inset" : ""
           } ${isMarked(index) ? markedClasses : ""}`}
         >
