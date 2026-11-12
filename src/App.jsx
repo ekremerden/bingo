@@ -12,13 +12,14 @@ import ResultBar from "./components/ResultBar";
 function App() {
   const dnd = useBingoDragDrop(25);
   const [onlyPlaced, setOnlyPlaced] = useState(false);
+  const [sticky, setSticky] = useState(false);
 
   return (
     <div className="font-['Open_Sans',sans-serif] text-sm">
-      <Header onlyPlaced={onlyPlaced} />
+        <Header onlyPlaced={onlyPlaced} />
 
       {/* sticky: the board stays visible while scrolling through the phrase list */}
-      <div className="sticky top-0 z-10 mx-auto max-w-96 bg-background py-2">
+      <div className={`${sticky ? "sticky top-0 z-10" : ""} mx-auto max-w-96 bg-background py-2`}>
         <div className="flex justify-center">
           <BingoGrid dnd={dnd} />
         </div>
@@ -31,6 +32,8 @@ function App() {
             score={dnd.score}
             onlyPlaced={onlyPlaced}
             onToggleOnlyPlaced={() => setOnlyPlaced((v) => !v)}
+            sticky={sticky}
+            onToggleSticky={() => setSticky((s) => !s)}
           />
         </div>
       </div>

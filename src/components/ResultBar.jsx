@@ -1,8 +1,8 @@
-import { Filter, LineHeight } from "lucide-react";
+import { Filter, LineHeight, Pin, PinOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UserScore from "./UserScore";
 
-export default function ResultBar({ score, onlyPlaced, onToggleOnlyPlaced }) {
+export default function ResultBar({ score, onlyPlaced, onToggleOnlyPlaced, sticky, onToggleSticky }) {
   return (
     <div className="flex gap-2">
       <Button
@@ -27,9 +27,19 @@ export default function ResultBar({ score, onlyPlaced, onToggleOnlyPlaced }) {
         <LineHeight className="size-5" />
       </Button>
 
-      {/* <UserScore user={"Bingos"} score={score} /> */}
-      <UserScore user={"Ekrem"} score={score} />
-      <UserScore user={"Lena"} score={score} />
+      <Button
+        size="xs"
+        variant={sticky ? "default" : "outline"}
+        title={sticky ? "Let board scroll away" : "Keep board visible while scrolling"}
+        aria-pressed={sticky}
+        onClick={onToggleSticky}
+      >
+        {sticky ? <Pin /> : <PinOff />}
+      </Button>
+
+      <UserScore user={"Bingos"} score={score} />
+      {/* <UserScore user={"Ekrem"} score={score} /> */}
+      {/* <UserScore user={"Lena"} score={score} /> */}
     </div>
   );
 }

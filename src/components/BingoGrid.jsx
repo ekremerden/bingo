@@ -1,5 +1,5 @@
 import { items } from "@/items.js";
-import { markedClasses } from "@/components/markedClasses.js";
+import { markedBgClass, markedClasses } from "@/components/markedClasses.js";
 
 const textById = new Map(items.map((item) => [item.id, item.text]));
 
@@ -40,7 +40,11 @@ export default function BingoGrid({ dnd }) {
               onDragEnd={endDragFromCell(index)}
               // bingo highlight (legacy .bingo-highlight) replaces the gray background
               className={`flex h-full w-full ${started ? "cursor-pointer" : "cursor-grab"} items-center justify-center font-medium text-[1.5rem] transition-colors duration-1000 ${
-                isBingoCell(index) ? "bg-[rgba(49,161,165,0.251)]" : "bg-gray-100"
+                isBingoCell(index)
+                  ? "bg-[rgba(49,161,165,0.251)]"
+                  : isMarked(index)
+                    ? markedBgClass
+                    : "bg-gray-50"
               } ${
                 dragging?.from === index ? "opacity-50" : ""
               }`}

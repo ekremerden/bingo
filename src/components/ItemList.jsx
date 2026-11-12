@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { markedClasses } from "@/components/markedClasses.js";
+import { markedBgClass, markedClasses } from "@/components/markedClasses.js";
 
 // max gap between two taps/clicks on the same item to count as a double tap
 const DOUBLE_TAP_MS = 350;
@@ -52,7 +52,11 @@ export default function ItemList({ items, dnd, onlyPlaced = false }) {
             className={`flex touch-manipulation items-center break-inside-avoid gap-2 border-t border-black/20 ${
               isPlaced ? "font-bold" : "cursor-grab"
             } ${isBeingDragged ? "opacity-100 text-[#227679]" : ""} ${onlyPlaced ? "min-h-7" : ""} ${
-              isItemFlagged(item.id) ? "bg-red-100" : ""
+              isItemFlagged(item.id)
+                ? "bg-red-100"
+                : isItemMarked(item.id)
+                  ? markedBgClass
+                  : ""
             }`}
           >
             <span
