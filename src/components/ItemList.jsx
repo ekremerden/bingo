@@ -1,7 +1,13 @@
 import { markedBgClass, markedClasses } from "@/components/markedClasses.js";
 import { useDoubleTap } from "@/hooks/useDoubleTap.js";
 
-export default function ItemList({ items, dnd, onlyPlaced = false }) {
+export default function ItemList({
+  items,
+  dnd,
+  onlyPlaced = false,
+  query = "",
+  onItemActivated,
+}) {
   const {
     placed,
     started,
@@ -16,9 +22,15 @@ export default function ItemList({ items, dnd, onlyPlaced = false }) {
   } = dnd;
   const handleTap = useDoubleTap();
 
-  const visibleItems = onlyPlaced
-    ? items.filter((item) => placed.has(item.id))
-    : items;
+  // case-insensitive text match, or an exact id match (the board shows ids)
+  const q = query.trim().toLocaleLowerCase("de");
+  const visibleItems = items.filter(
+    (item) =>
+      (!onlyPlaced || placed.has(item.id)) &&
+      (!q ||
+        String(item.id) === q ||
+        item.text.toLocaleLowerCase("de").includes(q)),
+  );
 
   return (
     <ol className="columns-2 gap-4 sm:columns-2 lg:columns-2">
@@ -39,7 +51,10 @@ export default function ItemList({ items, dnd, onlyPlaced = false }) {
             // setup: single tap selects for tap-to-place; game: double tap marks/flags
             onClick={(e) =>
               started
-                ? handleTap(item.id, e, () => activateItem(item.id))
+                ? handleTap(item.id, e, () => {
+                    activateItem(item.id);
+                    onItemActivated?.();
+                  })
                 : tapItem(item.id)
             }
             // touch-manipulation: no double-tap-to-zoom, so the 2nd tap reaches us

@@ -34,7 +34,7 @@ There is no test runner configured. Don't run `npm run build` just to check a ch
   - Game phase: double-tapping a cell toggles a mark (a single tap does nothing, to avoid accidental marks). Marks are stored by item id in `marked`, so they follow the item. Double-tapping a list item marks it if it's on the board, otherwise toggles a red "flag" (`flagged`).
   - Persistence: `cells`, `marked`, `flagged` and `started` are saved to `localStorage` (`src/hooks/gameStorage.js`, key `mma-bingo-game-v1`) on every change and restored on load, so an accidental reload keeps the game. `reset` also ends a started game; `SetupBar` shows an "End" button once started, confirmed through a shadcn `AlertDialog` (`src/components/ui/alert-dialog.jsx`, Base UI based). `index.css` sets `overscroll-behavior-y: none` on `html` to suppress pull-to-refresh.
   - `score` and `isBingoCell` are derived from `BINGO_LINES` (5 rows, 5 columns, 2 diagonals): a line is a bingo when all 5 cells are marked.
-- `App.jsx` creates the hook once and lays out `Header`, the sticky `BingoGrid`, `SetupBar` (Reset, dice, Start, date), `ResultBar` (only-placed filter toggle and scores) and `ItemList`. The `onlyPlaced` filter state lives in `App`.
+- `App.jsx` creates the hook once and lays out `Header`, the sticky `BingoGrid`, `SetupBar` (Reset, dice, Start, date), `ResultBar` (only-placed filter toggle and scores) and `ItemList`. The `onlyPlaced` filter and the search `query` (shadcn `InputGroup` in `ResultBar`, not persisted) live in `App`. `ItemList` combines both filters: the query matches phrase text case-insensitively or an item id exactly, in setup and game phase, and is cleared after an item is marked/flagged by double tap.
 - `BingoGrid` and `ItemList` detect double taps with `src/hooks/useDoubleTap.js` (two clicks on the same target within `DOUBLE_TAP_MS`) because `onDoubleClick` is unreliable on mobile. Targets get `touch-manipulation` so double-tap-to-zoom doesn't swallow the second tap.
 - `src/components/markedClasses.js` holds the Tailwind classes that draw the X on marked cells and items (used by `BingoGrid` and `ItemList`).
 - `src/items.js` is the phrase catalogue (`{ id, text }`, optional `bold`); the ids are what's shown on the board.
@@ -47,6 +47,5 @@ The app body uses Open Sans (`@fontsource/open-sans`, set via a class in `App.js
 ### Not done yet
 
 - Player handling: `ResultBar` shows two hard-coded players ("Ekrem", "Lena") with the same shared `score`; there is no player toggle or per-player state.
-- The `LineHeight` button in `ResultBar` is a hidden placeholder.
 - `index.html` links `/favicon.svg`, which doesn't exist (`public/` is empty).
 - `README.md` is still the Vite template README.

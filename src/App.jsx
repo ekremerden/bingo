@@ -13,6 +13,7 @@ function App() {
   const dnd = useBingoDragDrop(25);
   const [onlyPlaced, setOnlyPlaced] = useState(false);
   const [sticky, setSticky] = useState(false);
+  const [query, setQuery] = useState("");
 
   return (
     <div className="font-['Open_Sans',sans-serif] text-sm">
@@ -34,12 +35,21 @@ function App() {
             onToggleOnlyPlaced={() => setOnlyPlaced((v) => !v)}
             sticky={sticky}
             onToggleSticky={() => setSticky((s) => !s)}
+            query={query}
+            onQueryChange={setQuery}
           />
         </div>
       </div>
 
       <main className="mx-auto max-w-90 my-2">
-        <ItemList items={items} dnd={dnd} onlyPlaced={onlyPlaced} />
+        <ItemList
+          items={items}
+          dnd={dnd}
+          onlyPlaced={onlyPlaced}
+          query={query}
+          // the search has done its job once the phrase is marked/flagged
+          onItemActivated={() => setQuery("")}
+        />
       </main>
     </div>
   );
