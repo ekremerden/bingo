@@ -23,6 +23,9 @@ export function useBingoDragDrop(gridSize = 25) {
   // { itemId: number, from: number | null }  (from = grid index, null = from list)
   const [dragging, setDragging] = useState(null);
   const [overIndex, setOverIndex] = useState(null);
+  // tap-to-place (touch screens have no HTML5 drag & drop): the item picked by
+  // a tap, same shape as `dragging`. Not persisted.
+  const [selected, setSelected] = useState(null);
   // item ids marked with an X (stored by item, so the mark moves with it)
   const [marked, setMarked] = useState(() => saved?.marked ?? new Set());
   // false = setup phase (fill the board), true = game running (marking only)
@@ -34,7 +37,52 @@ export function useBingoDragDrop(gridSize = 25) {
 
   // start is only allowed once every grid box holds an item
   const start = () => {
-    if (isFull) setStarted(true);
+    if (isFull) {
+      setStarted(true);
+      setSelected(null);
+    }
+  };
+
+  // setup phase, tap on a list item: select it (placed items select their
+  // cell, so the next tap can move it); tapping the selected item again
+  // deselects it.
+  const tapItem = (itemId) => {
+    if (started) return;
+    if (selected?.itemId === itemId) {
+      setSelected(null);
+      return;
+    }
+    const index = cells.indexOf(itemId);
+    setSelected({ itemId, from: index === -1 ? null : index });
+  };
+
+  // setup phase, tap on a grid box:
+  // - empty box + selection → place (or move) the selected item there
+  // - the selected item's own box → take it off the board
+  // - other occupied box → select that item
+  const tapCell = (index) => {
+    if (started) return;
+    const itemId = cells[index];
+    if (itemId === null) {
+      if (!selected) return;
+      setCells((prev) => {
+        const next = [...prev];
+        if (selected.from !== null) next[selected.from] = null;
+        next[index] = selected.itemId;
+        return next;
+      });
+      setSelected(null);
+    } else if (selected?.from === index) {
+      unmark(itemId);
+      setCells((prev) => {
+        const next = [...prev];
+        next[index] = null;
+        return next;
+      });
+      setSelected(null);
+    } else {
+      setSelected({ itemId, from: index });
+    }
   };
 
   const startDrag = (itemId, from) => (e) => {
@@ -47,6 +95,7 @@ export function useBingoDragDrop(gridSize = 25) {
     e.dataTransfer.setData("text/plain", String(itemId)); // Firefox needs this
     e.dataTransfer.effectAllowed = "move";
     setDragging({ itemId, from });
+    setSelected(null);
   };
 
   const endDrag = () => {
@@ -159,6 +208,7 @@ export function useBingoDragDrop(gridSize = 25) {
   // Fill every empty cell with a random, not-yet-placed item id
   // (port of the legacy dice button). Occupied cells are kept.
   const fillRandom = (itemIds) => {
+    setSelected(null);
     setCells((prev) => {
       const used = new Set(prev.filter((c) => c !== null));
       const pool = itemIds.filter((id) => !used.has(id));
@@ -178,6 +228,7 @@ export function useBingoDragDrop(gridSize = 25) {
     setCells(Array(gridSize).fill(null));
     setMarked(new Set());
     setFlagged(new Set());
+    setSelected(null);
     endDrag();
   };
 
@@ -191,6 +242,9 @@ export function useBingoDragDrop(gridSize = 25) {
     placed,
     dragging,
     overIndex,
+    selected,
+    tapItem,
+    tapCell,
     startDrag,
     endDrag,
     endDragFromCell,

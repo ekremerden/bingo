@@ -10,6 +10,8 @@ export default function BingoGrid({ dnd }) {
     started,
     dragging,
     overIndex,
+    selected,
+    tapCell,
     startDrag,
     endDragFromCell,
     toggleMark,
@@ -30,10 +32,19 @@ export default function BingoGrid({ dnd }) {
           onDragOver={dragOverCell(index)}
           onDragLeave={leaveCell}
           onDrop={dropOnCell(index)}
-          onClick={(e) => handleTap(index, e, () => toggleMark(index))}
+          // setup: single tap places/moves/selects (tap-to-place for touch
+          // screens); game: double tap marks
+          onClick={(e) =>
+            started
+              ? handleTap(index, e, () => toggleMark(index))
+              : tapCell(index)
+          }
           // touch-manipulation: no double-tap-to-zoom, so the 2nd tap reaches us
           className={`relative touch-manipulation aspect-square border border-gray-400 ${
             overIndex === index ? "bg-blue-100 ring-2 ring-blue-400 ring-inset" : ""
+          } ${
+            // an item is selected: hint the empty boxes it can go to
+            selected && itemId === null ? "cursor-pointer bg-blue-50" : ""
           } ${isMarked(index) ? markedClasses : ""}`}
         >
           {itemId !== null && (
@@ -51,6 +62,10 @@ export default function BingoGrid({ dnd }) {
                     : "bg-gray-50"
               } ${
                 dragging?.from === index ? "opacity-50" : ""
+              } ${
+                selected?.from === index
+                  ? "relative z-10 ring-2 ring-[#227679] ring-inset text-[#227679]"
+                  : ""
               }`}
             >
               {itemId}

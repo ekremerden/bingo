@@ -4,7 +4,10 @@ import { useDoubleTap } from "@/hooks/useDoubleTap.js";
 export default function ItemList({ items, dnd, onlyPlaced = false }) {
   const {
     placed,
+    started,
     dragging,
+    selected,
+    tapItem,
     startDrag,
     endDrag,
     isItemMarked,
@@ -23,6 +26,7 @@ export default function ItemList({ items, dnd, onlyPlaced = false }) {
         const isPlaced = placed.has(item.id);
         const isBeingDragged =
           dragging?.itemId === item.id && dragging.from === null;
+        const isSelected = selected?.itemId === item.id;
 
         return (
           <li
@@ -32,12 +36,19 @@ export default function ItemList({ items, dnd, onlyPlaced = false }) {
             onDragEnd={endDrag}
             // keep the double click from selecting a word
             onMouseDown={(e) => e.detail > 1 && e.preventDefault()}
-            onClick={(e) => handleTap(item.id, e, () => activateItem(item.id))}
+            // setup: single tap selects for tap-to-place; game: double tap marks/flags
+            onClick={(e) =>
+              started
+                ? handleTap(item.id, e, () => activateItem(item.id))
+                : tapItem(item.id)
+            }
             // touch-manipulation: no double-tap-to-zoom, so the 2nd tap reaches us
             className={`flex touch-manipulation items-center break-inside-avoid min-h-7
               gap-1 border-t border-black/20 ${
               isPlaced ? "font-bold" : "cursor-grab"
-            } ${isBeingDragged ? "opacity-100 text-[#227679]" : ""} ${onlyPlaced ? "min-h-7" : ""} ${
+            } ${isBeingDragged ? "opacity-100 text-[#227679]" : ""} ${
+              isSelected ? "bg-[#227679]/15 text-[#227679]" : ""
+            } ${onlyPlaced ? "min-h-7" : ""} ${
               isItemFlagged(item.id)
                 ? "bg-red-100"
                 : isItemMarked(item.id)
